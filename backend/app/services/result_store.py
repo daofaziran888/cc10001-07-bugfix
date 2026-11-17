@@ -8,7 +8,7 @@ from app.store import store
 MODULE = "result_store"
 LIST_FIELDS = ["批次编号", "关联任务", "原始行数", "有效行数", "存储路径", "压缩格式", "校验摘要", "落地时间"]
 REQUIRED_FIELDS = ["批次编号", "关联任务", "原始行数"]
-STATUS_ORDER = ["接收中", "已落盘", "校验通过", "校验失败"]
+STATUS_ORDER = ["接收中", "已落盘", "校验通过", "待复核", "校验失败"]
 ACTION_RULES = {"触发校验": "校验通过", "标记通过": "校验失败", "标记失败": "已落盘"}
 NEGATIVE_ACTIONS = []
 

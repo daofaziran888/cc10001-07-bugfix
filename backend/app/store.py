@@ -94,6 +94,10 @@ class Store:
         self._joint.setdefault(key, []).append(record)
         self._save_joint(key)
 
+    def joint_save(self, key: str) -> None:
+        """把联合存储表的内存修改（如审计记录更新）持久化到磁盘。"""
+        self._save_joint(key)
+
     def joint_find(self, key: str, record_id: int) -> dict[str, Any] | None:
         for row in self.joint_rows(key):
             if int(row.get("id", 0)) == record_id:

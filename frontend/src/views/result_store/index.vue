@@ -31,12 +31,20 @@
       <thead>
         <tr>
           <th v-for="column in columns" :key="column">{{ column }}</th>
+          <th>审计结论</th>
           <th>可执行动作</th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="row in rows" :key="String(row.id)" :data-testid="`row-${row.id}`" :data-status="String(row.status)">
           <td v-for="column in columns" :key="column">{{ row[column] ?? '—' }}</td>
+          <td>
+            <template v-if="auditOf(row)">
+              <span class="verdict-tag" :class="`verdict-${auditOf(row).verdict}`">{{ auditOf(row).verdict }}</span>
+              <button class="link" type="button" :data-testid="`audit-basis-${row.id}`" @click="showBatchAudit(row)">行数依据</button>
+            </template>
+            <span v-else>—</span>
+          </td>
           <td class="row-actions">
             <button
               v-for="action in actions"
@@ -51,10 +59,26 @@
           </td>
         </tr>
         <tr v-if="!rows.length">
-          <td :colspan="columns.length + 1" class="empty-state">暂无采集仓储数据，可先登记结果批次</td>
+          <td :colspan="columns.length + 2" class="empty-state">暂无采集仓储数据，可先登记结果批次</td>
         </tr>
       </tbody>
     </table>
+
+    <div v-if="batchAudit" class="audit-detail" data-testid="batch-audit-detail">
+      <h4>行数依据 · {{ batchAudit.batch_no || batchAudit.audit_no }}</h4>
+      <dl class="audit-grid">
+        <dt>判定依据</dt>
+        <dd>原始行数 {{ batchAudit.raw_rows ?? '未知' }}，有效行数 {{ batchAudit.valid_rows ?? '未知' }}，存储路径 {{ batchAudit.storage_path || '—' }}，摘要长度 {{ batchAudit.checksum_length ?? '—' }}</dd>
+        <dt>存储文件行数</dt><dd>{{ batchAudit.storage_rows ?? '不可读' }}</dd>
+        <dt>有效率</dt><dd>{{ formatRate(batchAudit.valid_rate) }}</dd>
+        <dt>阈值</dt><dd>{{ batchAudit.threshold || '—' }}</dd>
+        <dt>实际值</dt><dd>{{ batchAudit.actual || '—' }}</dd>
+        <dt>判定结果</dt><dd>{{ batchAudit.verdict }}</dd>
+        <dt>修正后批次状态</dt><dd>{{ batchAudit.batch_status || '—' }}</dd>
+        <dt>问题</dt><dd>{{ (batchAudit.issues || []).join('；') || '无' }}</dd>
+        <dt>处理建议</dt><dd>{{ (batchAudit.suggestions || []).join('；') || '无需处理' }}</dd>
+      </dl>
+    </div>
 
     <div v-if="showCreate" class="modal-backdrop" data-testid="create-modal">
       <form class="modal" @submit.prevent="submitCreate">
@@ -100,6 +124,8 @@ const filterFields = columns.slice(0, 3)
 const showCreate = ref(false)
 const creating = ref(false)
 const createValues = ref<Record<string, string>>({})
+const auditRecords = ref<any[]>([])
+const batchAudit = ref<any>(null)
 const stats = computed(() => [
   { label: metricNames[0], value: total.value },
   { label: metricNames[1], value: rows.value.filter((row) => row.status === statuses[1]).length },
@@ -184,5 +210,28 @@ async function reload() {
   }
 }
 
-onMounted(reload)
+// 审计记录数据集：与质量审计页读取同一行数依据
+async function loadAuditRecords() {
+  try {
+    const response = await request('/api/pipeline/audit/records')
+    if (response.ok) auditRecords.value = await response.json()
+  } catch {
+    /* 审计记录加载失败时保留批次列表可用 */
+  }
+}
+
+function auditOf(row: Row) {
+  return auditRecords.value.find((rec) => Number(rec.batch_id) === Number(row.id))
+}
+
+function showBatchAudit(row: Row) {
+  const rec = auditOf(row)
+  batchAudit.value = batchAudit.value?.id === rec?.id ? null : rec
+}
+
+function formatRate(rate: unknown) {
+  return typeof rate === 'number' ? `${(rate * 100).toFixed(1)}%` : '—'
+}
+
+onMounted(() => { reload(); loadAuditRecords() })
 </script>

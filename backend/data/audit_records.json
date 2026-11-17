@@ -1,30 +1,104 @@
 [
   {
     "id": 1,
-    "batch_id": 1,
+    "batch_id": 4,
     "audit_entry_id": 4,
-    "verdict": "不通过",
-    "issues": [
-      "校验摘要过短"
-    ],
-    "audited_at": "2026-11-16 10:57:45"
+    "audit_no": "AUDIT-4-1794881887",
+    "batch_no": "BATCH-1-1794881887",
+    "verdict": "通过",
+    "issues": [],
+    "suggestions": [],
+    "threshold": "有效率>=80%, 摘要长度>=8, 有效行数与存储文件一致",
+    "actual": "有效147/原始150(有效率98.0%), 存储文件147行, 摘要16字符",
+    "raw_rows": 150,
+    "valid_rows": 147,
+    "valid_rate": 0.98,
+    "storage_path": "data/store/batch/1/78c0d0be2d36d237.json",
+    "storage_rows": 147,
+    "checksum": "78c0d0be2d36d237",
+    "checksum_length": 16,
+    "batch_status": "校验通过",
+    "audited_at": "2026-11-17 02:18:36"
   },
   {
     "id": 2,
-    "batch_id": 2,
+    "batch_id": 5,
     "audit_entry_id": 5,
+    "audit_no": "AUDIT-5-1794881887",
+    "batch_no": "RESU-C",
     "verdict": "不通过",
     "issues": [
-      "校验摘要过短"
+      "声明有效行数100与存储文件实际行数90不一致"
     ],
-    "audited_at": "2026-11-16 10:57:45"
+    "suggestions": [
+      "按存储文件实际行数90修正有效行数，并重新生成校验摘要后重新入库"
+    ],
+    "threshold": "有效率>=80%, 摘要长度>=8, 有效行数与存储文件一致",
+    "actual": "有效100/原始100(有效率100.0%), 存储文件90行, 摘要12字符",
+    "raw_rows": 100,
+    "valid_rows": 100,
+    "valid_rate": 1.0,
+    "storage_path": "data/store/batch/manual/c.json",
+    "storage_rows": 90,
+    "checksum": "abc123def456",
+    "checksum_length": 12,
+    "batch_status": "校验失败",
+    "audited_at": "2026-11-17 02:18:07"
   },
   {
     "id": 3,
-    "batch_id": 4,
+    "batch_id": 1,
     "audit_entry_id": 6,
-    "verdict": "通过",
-    "issues": [],
-    "audited_at": "2026-11-16 10:57:45"
+    "audit_no": "AUDIT-1-1794881887",
+    "batch_no": "RESU-0001",
+    "verdict": "待复核",
+    "issues": [
+      "原始行数缺失或非数值",
+      "有效行数缺失或非数值",
+      "校验摘要过短",
+      "存储文件缺失或不可读，无法核对行数"
+    ],
+    "suggestions": [
+      "补齐存储文件或修正存储路径后重新审计"
+    ],
+    "threshold": "有效率>=80%, 摘要长度>=8, 有效行数与存储文件一致",
+    "actual": "有效未知/原始未知(有效率无法计算), 存储文件不可读, 摘要7字符",
+    "raw_rows": null,
+    "valid_rows": null,
+    "valid_rate": null,
+    "storage_path": "采集仓储样例1",
+    "storage_rows": null,
+    "checksum": "采集仓储样例1",
+    "checksum_length": 7,
+    "batch_status": "待复核",
+    "audited_at": "2026-11-17 02:18:36"
+  },
+  {
+    "id": 4,
+    "batch_id": 2,
+    "audit_entry_id": 7,
+    "audit_no": "AUDIT-2-1794881887",
+    "batch_no": "RESU-0002",
+    "verdict": "待复核",
+    "issues": [
+      "原始行数缺失或非数值",
+      "有效行数缺失或非数值",
+      "校验摘要过短",
+      "存储文件缺失或不可读，无法核对行数"
+    ],
+    "suggestions": [
+      "补齐存储文件或修正存储路径后重新审计"
+    ],
+    "threshold": "有效率>=80%, 摘要长度>=8, 有效行数与存储文件一致",
+    "actual": "有效未知/原始未知(有效率无法计算), 存储文件不可读, 摘要7字符",
+    "raw_rows": null,
+    "valid_rows": null,
+    "valid_rate": null,
+    "storage_path": "采集仓储样例2",
+    "storage_rows": null,
+    "checksum": "采集仓储样例2",
+    "checksum_length": 7,
+    "batch_status": "待复核",
+    "audited_at": "2026-11-17 02:18:36"
   }
 ]

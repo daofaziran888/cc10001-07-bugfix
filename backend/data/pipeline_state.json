@@ -9,5 +9,38 @@
     "checksum": "bbfc90312ba9b340",
     "started_at": "2026-11-16 10:57:45",
     "finished_at": "2026-11-16 10:57:45"
+  },
+  {
+    "id": 2,
+    "segment_id": 1,
+    "batch_id": 4,
+    "status": "已完成",
+    "raw_rows": 150,
+    "valid_rows": 147,
+    "checksum": "2cab8fb601195d96",
+    "started_at": "2026-11-17 02:05:34",
+    "finished_at": "2026-11-17 02:05:34"
+  },
+  {
+    "id": 3,
+    "segment_id": 1,
+    "batch_id": 4,
+    "status": "已完成",
+    "raw_rows": 150,
+    "valid_rows": 147,
+    "checksum": "cc7fe7b438268d29",
+    "started_at": "2026-11-17 02:15:00",
+    "finished_at": "2026-11-17 02:15:00"
+  },
+  {
+    "id": 4,
+    "segment_id": 1,
+    "batch_id": 4,
+    "status": "已完成",
+    "raw_rows": 150,
+    "valid_rows": 147,
+    "checksum": "78c0d0be2d36d237",
+    "started_at": "2026-11-17 02:18:07",
+    "finished_at": "2026-11-17 02:18:07"
   }
 ]

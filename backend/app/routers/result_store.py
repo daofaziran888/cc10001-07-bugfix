@@ -15,7 +15,7 @@ router = APIRouter(prefix="/api/result_store", tags=["采集仓储"])
 service = ResultStoreService()
 
 LIST_FIELDS = ["批次编号", "关联任务", "原始行数", "有效行数", "存储路径", "压缩格式", "校验摘要", "落地时间"]
-STATUSES = ["接收中", "已落盘", "校验通过", "校验失败"]
+STATUSES = ["接收中", "已落盘", "校验通过", "待复核", "校验失败"]
 
 
 def query_filters(request: Request) -> dict[str, str]:
@@ -31,7 +31,7 @@ def query_filters(request: Request) -> dict[str, str]:
 def list_entries(
     request: Request,
     keyword: str | None = Query(default=None, description="按批次编号检索"),
-    status: str | None = Query(default=None, description="接收中、已落盘、校验通过、校验失败"),
+    status: str | None = Query(default=None, description="接收中、已落盘、校验通过、待复核、校验失败"),
     page: int = Query(default=1, ge=1),
     size: int = Query(default=20, ge=1, le=200),
 ) -> PageResult[dict]:

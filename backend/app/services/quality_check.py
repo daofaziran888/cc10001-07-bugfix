@@ -8,9 +8,13 @@ from app.store import store
 
 MODULE = "quality_check"
 REQUIRED_FIELDS = ["记录编号", "关联批次", "检查项"]
+LIST_FIELDS = ["记录编号", "关联批次", "检查项", "阈值", "实际值", "判定结果", "审计时间", "处理建议"]
 STATUS_ORDER = ["待审计", "已通过", "需修复", "已忽略"]
 ACTION_RULES = {"执行审计": "已通过", "确认通过": "需修复", "提交修复": "已忽略"}
 NEGATIVE_ACTIONS = []
+
+# 审计结论 -> 审计记录状态：通过终态、失败终态与待复核终态分别落位
+VERDICT_STATUS = {"通过": "已通过", "不通过": "需修复", "待复核": "待审计"}
 
 
 class QualityCheckService:
@@ -40,12 +44,29 @@ class QualityCheckService:
             return None, missing
         rows = store.rows(MODULE)
         entry = {"id": max((int(r.get("id", 0)) for r in rows), default=0) + 1}
-        entry.update({f: values.get(f) for f in REQUIRED_FIELDS})
+        entry.update({f: values.get(f) for f in LIST_FIELDS if values.get(f) is not None})
         entry["status"] = STATUS_ORDER[0]
         entry["pending"] = True
         entry["abnormal"] = False
         rows.append(entry)
         return entry, []
+
+    def update_entry(self, entry_id: int, values: dict[str, Any]) -> dict[str, Any] | None:
+        """更新既有审计记录的字段；重复审计同一批次时复用，避免多出审计记录。"""
+        entry = store.find(MODULE, entry_id)
+        if entry is None:
+            return None
+        for field, value in values.items():
+            if value is not None:
+                entry[field] = value
+        return entry
+
+    def apply_verdict(self, entry: dict[str, Any], verdict: str) -> dict[str, Any]:
+        """把审计结论落到记录状态：通过、失败与待复核三种终态。"""
+        entry["status"] = VERDICT_STATUS.get(verdict, STATUS_ORDER[0])
+        entry["pending"] = verdict != "通过"
+        entry["abnormal"] = verdict == "不通过"
+        return entry
 
     def run_action(self, entry_id: int, action: str) -> tuple[dict[str, Any] | None, str]:
         entry = store.find(MODULE, entry_id)

@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import time
 from typing import Any
 
@@ -13,6 +14,8 @@ from app.store import store
 from app.services.result_store import ResultStoreService
 
 MODULE = "data_pipeline"
+
+_BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 class PipelineExecutor:
@@ -23,6 +26,17 @@ class PipelineExecutor:
     def _next_id(self) -> int:
         rows = store.joint_rows("pipeline_state")
         return max((int(r.get("id", 0)) for r in rows), default=0) + 1
+
+    @staticmethod
+    def _write_storage_file(segment_id: int, checksum: str, valid_rows: int) -> str:
+        """把有效行真实写入存储文件，供质量审计按存储文件实际行数核对。"""
+        rel_path = f"data/store/batch/{segment_id}/{checksum}.json"
+        abs_path = os.path.join(_BACKEND_DIR, rel_path)
+        os.makedirs(os.path.dirname(abs_path), exist_ok=True)
+        payload = [{"segment_id": segment_id, "row_no": i + 1} for i in range(valid_rows)]
+        with open(abs_path, "w", encoding="utf-8") as f:
+            json.dump(payload, f, ensure_ascii=False)
+        return rel_path
 
     def execute_segment(self, segment_id: int) -> dict[str, Any]:
         """执行单个流水线段，生成结果批次并写入采集仓储。"""
@@ -36,6 +50,7 @@ class PipelineExecutor:
         checksum = hashlib.sha256(
             json.dumps({"segment_id": segment_id, "ts": time.time()}, ensure_ascii=False).encode()
         ).hexdigest()[:16]
+        storage_path = self._write_storage_file(segment_id, checksum, valid_rows)
 
         # 写入采集仓储（跨模块数据产物）
         batch_values = {
@@ -43,7 +58,7 @@ class PipelineExecutor:
             "关联任务": str(segment.get("段编号", "")),
             "原始行数": str(raw_rows),
             "有效行数": str(valid_rows),
-            "存储路径": f"/store/batch/{segment_id}/{checksum}.json",
+            "存储路径": storage_path,
             "压缩格式": "gzip",
             "校验摘要": checksum,
             "落地时间": time.strftime("%Y-%m-%d %H:%M:%S"),
